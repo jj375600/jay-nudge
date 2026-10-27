@@ -1,0 +1,36 @@
+{
+  "name": "jay-nudge",
+  "version": "1.0.0",
+  "description": "SMS accountability bot: session reminders, daily workout check-ins and automatic nudges. Event-driven TypeScript service (Fastify, BullMQ, Redis, Postgres, Twilio).",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "NUDGE_DEV=1 node --env-file=.env --import tsx scripts/start-all.mjs",
+    "start": "node dist/server.js",
+    "worker": "node dist/worker.js",
+    "db:setup": "node --env-file=.env scripts/db-setup.mjs",
+    "db:reset": "node --env-file=.env scripts/db-setup.mjs --reset",
+    "start:test": "node --env-file=.env.test scripts/start-all.mjs",
+    "test": "node --env-file=.env.test --import tsx --test tests/*.test.ts",
+    "db:test": "node --env-file=.env.test scripts/db-setup.mjs --reset"
+  },
+  "dependencies": {
+    "@fastify/formbody": "^9.0.1",
+    "bullmq": "^6.4.0",
+    "fastify": "^5.12.7",
+    "ioredis": "^6.0.0",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
