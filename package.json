@@ -17,6 +17,7 @@
     "db:reset": "node --env-file=.env scripts/db-setup.mjs --reset",
     "start:test": "node --env-file=.env.test scripts/start-all.mjs",
     "test": "node --env-file=.env.test --import tsx --test tests/*.test.ts",
+    "demo:seed": "node --env-file=.env scripts/seed-demo.mjs",
     "db:test": "node --env-file=.env.test scripts/db-setup.mjs --reset"
   },
   "dependencies": {

@@ -14,6 +14,7 @@ It is still a portfolio project; the limitations at the bottom are stated plainl
 | Texting someone twice, or after they said STOP | Every text has a unique `dedupe_key`; opt-out is checked again at send time, so a job queued before STOP still sends nothing. STOP is honoured anywhere in a message | `tests/delivery.test.ts`, `tests/optout.test.ts` |
 | Two bots answering each other forever | At most one "didn't understand" reply per contact per hour | `tests/checkins.test.ts` |
 | Leaking phone numbers | Logs and the admin summary show only the last four digits. The admin endpoint needs a bearer token (constant-time compare) | `tests/admin.test.ts` |
+| Dashboard attacks (script injection, token leaks) | `/admin` is a static page with no data in it. Data comes from `/admin/summary` with the bearer token in a header, never in a URL. A Content-Security-Policy allows only that one script (by hash), the page writes server text with `textContent`, never `innerHTML`, and the page can't be framed | `tests/admin.test.ts` |
 | A failing provider causing duplicate or lost texts | Transient errors (5xx, 429, network) are retried with exponential backoff, permanent ones (bad number) are not, and the attempt is recorded either way | `tests/delivery.test.ts` |
 | Injection | All SQL is parameterised. Inbound text is only ever compared to a fixed command list, never executed or interpolated | n/a |
 | Secrets in the repo | Configuration is read from the environment and validated at start-up; `.env` is git-ignored; `.env.test` holds only fake values | n/a |
@@ -36,4 +37,4 @@ It is still a portfolio project; the limitations at the bottom are stated plainl
   against the TCPA and carrier rules for its use case.
 - No rate limiting on the public endpoints beyond signature checks (put it behind a CDN or proxy in production).
 - Message bodies are stored for audit. A real deployment would add a retention period.
-- The admin summary is read-only and token-protected, not a full dashboard with user accounts.
+- The dashboard is read-only and uses one shared token, not user accounts. The token is kept in the browser tab's session storage until the tab closes.
