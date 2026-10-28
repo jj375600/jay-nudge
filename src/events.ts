@@ -55,6 +55,7 @@ const base = { eventId: z.string().min(1).max(128) };
 
 export const eventSchema = z.discriminatedUnion("type", [
   z.object({ ...base, type: z.literal("client.opted_in"), client }),
+  z.object({ ...base, type: z.literal("client.opted_out"), client: z.object({ id }) }),
   z.object({ ...base, type: z.literal("session.booked"), client, session }),
   z.object({ ...base, type: z.literal("session.cancelled"), session: z.object({ id }) }),
 ]);

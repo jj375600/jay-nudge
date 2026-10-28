@@ -47,6 +47,13 @@ export async function handleEvent(event: NudgeEvent): Promise<void> {
         if (event.type === "session.booked" && !contact.opted_out) await scheduleReminders(contact, event.session);
         return;
       }
+      case "client.opted_out":
+        // They withdrew consent on the website. Same effect as texting STOP; only a text of START brings them back.
+        await query(
+          "UPDATE contacts SET opted_out = TRUE, opted_out_at = COALESCE(opted_out_at, now()) WHERE external_id = $1 AND opted_out = FALSE",
+          [event.client.id],
+        );
+        return;
       case "session.cancelled":
         await cancelReminders(event.session.id);
         return;
