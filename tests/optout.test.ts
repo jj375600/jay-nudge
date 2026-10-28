@@ -125,3 +125,29 @@ describe("START", () => {
     assert.match(texts[1]!.body, /already subscribed/);
   });
 });
+
+describe("opting out on the website", () => {
+  test("client.opted_out stops reminders and the check-in chain, like STOP", async () => {
+    const c = await begin();
+    const res = await postEvent({ type: "client.opted_out", client: { id: c.ev.id } });
+    assert.equal(res.status, 200);
+    assert.equal(await optedOut(c.phone), true);
+
+    assert.equal(await promote(`checkin-${c.id}-${c.localDate}`), true);
+    await sleep(800);
+    assert.equal((await sentTo(c.phone)).length, 1, "no question sent");
+  });
+
+  test("a later website opt-in does not undo it; only texting START does", async () => {
+    const c = await begin();
+    await postEvent({ type: "client.opted_out", client: { id: c.ev.id } });
+    await postEvent({ type: "client.opted_in", client: c.ev });
+    assert.equal(await optedOut(c.phone), true);
+    await inbound(c.phone, "START");
+    await waitFor(async () => !(await optedOut(c.phone)), "opted back in");
+  });
+
+  test("an unknown client id is accepted and changes nothing", async () => {
+    assert.equal((await postEvent({ type: "client.opted_out", client: { id: randomUUID() } })).status, 200);
+  });
+});

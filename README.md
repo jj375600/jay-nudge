@@ -87,9 +87,9 @@ Plus `events_seen`, which remembers every accepted event id so a retried deliver
 
 ## Testing
 
-![tests](https://img.shields.io/badge/tests-118%20passing-brightgreen)
+![tests](https://img.shields.io/badge/tests-121%20passing-brightgreen)
 
-118 automated tests run against the real server, a real Postgres and a real Redis. A small fake Twilio server records every text
+121 automated tests run against the real server, a real Postgres and a real Redis. A small fake Twilio server records every text
 "sent" and can be told to fail, so the retry and error paths are tested too. Highlights:
 
 - **Signatures:** the Twilio check is verified against the worked example in Twilio's own documentation. Forged, edited,
@@ -141,7 +141,12 @@ JAY-AESTHETIX sends JSON events to `POST /events` with a header `X-Nudge-Signatu
   "session": { "id": "345", "date": "2026-10-23", "startTime": "18:00", "focus": "Strength training" } }
 
 { "eventId": "d7e3...", "type": "session.cancelled", "session": { "id": "345" } }
+
+{ "eventId": "e1b4...", "type": "client.opted_out", "client": { "id": "12" } }
 ```
+
+`client.opted_out` is sent when a client unticks the text-message box on the website. It has the same effect as texting `STOP`.
+Once someone has opted out either way, only texting `START` brings them back.
 
 | Response | Meaning |
 | --- | --- |
