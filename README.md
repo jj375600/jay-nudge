@@ -23,6 +23,17 @@ in the background, with no web page involved.
 | Opt-out and opt-in | `STOP` works at once, from anywhere in a message, and nothing is sent afterwards, even jobs queued before it. `START` or `YES` brings them back |
 | Reliable delivery | Rate-limited sending, retries with backoff for temporary Twilio errors, no retries for permanent ones, and a record of every text and its delivery status |
 
+## Text-message reminders (optional)
+
+JAY-AESTHETIX can connect to [jay-nudge](https://github.com/jj375600/jay-nudge), a separate service that texts clients
+session reminders and a daily workout check-in.
+
+- Clients opt in with an optional checkbox during onboarding. Their number is validated and stored as E.164.
+- The site sends signed events (`client.opted_in`, `client.opted_out`, `session.booked`, `session.cancelled`) to the bot.
+  Only clients who opted in are ever reported.
+- The bot is optional. If it is down, slow or not configured, bookings work exactly as before.
+- To turn it on, set `NUDGE_URL` and `NUDGE_EVENTS_SECRET` (the same value as the bot's `EVENTS_SECRET`).
+
 ## Architecture
 
 ```mermaid
