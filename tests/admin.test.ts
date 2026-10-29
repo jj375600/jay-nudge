@@ -66,7 +66,7 @@ describe("health and admin", () => {
     assert.match(csp, /frame-ancestors 'none'/);
     assert.ok(!/script-src[^;]*unsafe-inline/.test(csp), "inline scripts are allowed only by hash");
     // The one script on the page must be exactly the one the policy names.
-    const script = /<script>([\s\S]*?)<\/script>/.exec(html)![1]!;
+    const script = /<script>([\s\S]*?)<\/script>/i.exec(html)![1]!;
     const hash = createHash("sha256").update(script).digest("base64");
     assert.ok(csp.includes(`'sha256-${hash}'`), "the policy's hash matches the page's script");
     assert.ok(!/innerHTML|outerHTML|document\.write|eval\(/.test(script), "server text is only ever written with textContent");
