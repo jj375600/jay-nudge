@@ -2,6 +2,8 @@ import { timingSafeEqual } from "node:crypto";
 import formbody from "@fastify/formbody";
 import Fastify, { type FastifyInstance } from "fastify";
 import { config } from "./config.js";
+import { getSummary } from "./admin.js";
+import { DASHBOARD_CSP, DASHBOARD_HTML } from "./dashboard.js";
 import { db, maskPhone, query } from "./db.js";
 import { eventSchema, verifyEventSignature } from "./events.js";
 import { handleEvent, handleInbound, PhoneInUseError } from "./handlers.js";
@@ -100,26 +102,22 @@ export async function buildApp(): Promise<FastifyInstance> {
     return reply.type("text/xml").send(EMPTY_TWIML);
   });
 
-  // ---- a small read-only view for the owner.
+  // ---- a small read-only view for the owner. The page holds no data; the data comes from /admin/summary with the token.
+  app.get("/admin", async (_req, reply) =>
+    reply
+      .header("content-security-policy", DASHBOARD_CSP)
+      .header("x-content-type-options", "nosniff")
+      .header("referrer-policy", "no-referrer")
+      .header("cache-control", "no-store")
+      .type("text/html; charset=utf-8")
+      .send(DASHBOARD_HTML),
+  );
+
   app.get("/admin/summary", async (req, reply) => {
     const header = req.headers.authorization ?? "";
     if (!header.startsWith("Bearer ") || !safeEqual(header.slice(7), c.ADMIN_TOKEN)) return reply.code(401).send({ error: "unauthorized" });
 
-    const [contacts] = await query<{ total: string; opted_out: string }>("SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE opted_out) AS opted_out FROM contacts");
-    const messages = await query<{ status: string; n: string }>("SELECT status, COUNT(*) AS n FROM messages WHERE created_at > now() - interval '24 hours' GROUP BY status");
-    const checkins = await query<{ status: string; n: string }>("SELECT status, COUNT(*) AS n FROM checkins WHERE local_date >= (now() - interval '1 day')::date GROUP BY status");
-    const recent = await query<{ direction: string; kind: string; status: string; body: string; phone: string | null; created_at: Date }>(
-      `SELECT m.direction, m.kind, m.status, m.body, c.phone, m.created_at
-         FROM messages m LEFT JOIN contacts c ON c.id = m.contact_id ORDER BY m.id DESC LIMIT 10`,
-    );
-    const queue = await getQueues().schedule.getJobCounts("delayed", "waiting", "active", "failed");
-    return {
-      contacts: { total: Number(contacts?.total ?? 0), optedOut: Number(contacts?.opted_out ?? 0) },
-      messagesLast24h: Object.fromEntries(messages.map((m) => [m.status, Number(m.n)])),
-      checkinsRecent: Object.fromEntries(checkins.map((m) => [m.status, Number(m.n)])),
-      scheduleQueue: queue,
-      recent: recent.map((m) => ({ ...m, phone: m.phone ? maskPhone(m.phone) : null })),
-    };
+    return getSummary();
   });
 
   app.addHook("onClose", async () => {
