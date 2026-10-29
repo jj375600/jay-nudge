@@ -34,6 +34,7 @@ session reminders and a daily workout check-in.
 - The bot is optional. If it is down, slow or not configured, bookings work exactly as before.
 - To turn it on, set `NUDGE_URL` and `NUDGE_EVENTS_SECRET` (the same value as the bot's `EVENTS_SECRET`).
 
+
 ## Architecture
 
 ```mermaid
