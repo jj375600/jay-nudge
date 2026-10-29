@@ -34,6 +34,14 @@ session reminders and a daily workout check-in.
 - The bot is optional. If it is down, slow or not configured, bookings work exactly as before.
 - To turn it on, set `NUDGE_URL` and `NUDGE_EVENTS_SECRET` (the same value as the bot's `EVENTS_SECRET`).
 
+## Owner dashboard
+
+![Dashboard](docs/dashboard.png)
+
+Open `/admin` and enter your `ADMIN_TOKEN` to see each client's last 14 days (green worked out, blue rest day, red missed),
+their current and best streak, delivery counts, and the latest messages. It is read-only, shows only first names and the last four
+digits of a number, and the demo data in the picture is fictional (`npm run demo:seed` creates it on your own machine).
+
 ## Architecture
 
 ```mermaid
@@ -98,9 +106,9 @@ Plus `events_seen`, which remembers every accepted event id so a retried deliver
 
 ## Testing
 
-![tests](https://img.shields.io/badge/tests-121%20passing-brightgreen)
+![tests](https://img.shields.io/badge/tests-123%20passing-brightgreen)
 
-121 automated tests run against the real server, a real Postgres and a real Redis. A small fake Twilio server records every text
+123 automated tests run against the real server, a real Postgres and a real Redis. A small fake Twilio server records every text
 "sent" and can be told to fail, so the retry and error paths are tested too. Highlights:
 
 - **Signatures:** the Twilio check is verified against the worked example in Twilio's own documentation. Forged, edited,
